@@ -7,7 +7,7 @@ This as an official implementation of our arXiv 2024 paper
 
 Deblurring & novel-view synthesis results on [Deblur-NeRF](https://github.com/limacv/Deblur-NeRF/)'s real-world motion-blurred data:
 
-<video src=""></video>
+<video src="https://github.com/WU-CVGL/BAD-Gaussians/assets/43722188/58a24441-59f9-4232-8862-785e14038de6"></video>
 
 > Left: BAD-Gaussians deblured novel-view renderings;
 >
