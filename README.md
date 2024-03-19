@@ -1,4 +1,4 @@
-<h1 align=center> 😈<strong><i>BAD-Gaussians</i></strong>: <strong><i>B</i></strong>undle-<strong><i>A</i></strong>djusted <strong><i>D</i></strong>eblur Gaussian Splatting</h1>
+<h1 align=center font-weight:100> 😈<strong><i>BAD-Gaussians</i></strong>: <strong><i>B</i></strong>undle-<strong><i>A</i></strong>djusted <strong><i>D</i></strong>eblur Gaussian Splatting</h1>
 
 This as an official implementation of our arXiv 2024 paper 
 [**BAD-Gaussians**: Bundle Adjusted Deblur Gaussian Splatting](https://lingzhezhao.github.io/BAD-Gaussians/), based on the [nerfstudio](https://github.com/nerfstudio-project/nerfstudio) framework.
