@@ -1,0 +1,27 @@
+[project]
+name = "bad_gaussians"
+version = "1.0.2"
+
+dependencies=[
+    "nerfstudio>=1.0.2",
+    "pypose"
+]
+
+# black
+[tool.black]
+line-length = 120
+
+# pylint
+[tool.pylint.messages_control]
+max-line-length = 120
+generated-members = ["numpy.*", "torch.*", "cv2.*", "cv.*"]
+
+[tool.setuptools.packages.find]
+include = ["bad_gaussians"]
+
+[project.entry-points.'nerfstudio.dataparser_configs']
+image-restore-data = 'bad_gaussians.bad_config_dataparser:ImageRestoreDataParser'
+deblur-nerf-data = 'bad_gaussians.bad_config_dataparser:DeblurNerfDataParser'
+
+[project.entry-points.'nerfstudio.method_configs']
+bad_gaussians = 'bad_gaussians.bad_config_method:bad_gaussians'
