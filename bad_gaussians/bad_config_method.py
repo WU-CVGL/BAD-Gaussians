@@ -8,11 +8,11 @@ from nerfstudio.engine.schedulers import ExponentialDecaySchedulerConfig
 from nerfstudio.plugins.types import MethodSpecification
 
 from bad_gaussians.bad_camera_optimizer import BadCameraOptimizerConfig
+from bad_gaussians.bad_gaussians import BadGaussiansModelConfig
 from bad_gaussians.image_restoration_dataparser import ImageRestorationDataParserConfig
 from bad_gaussians.image_restoration_full_image_datamanager import ImageRestorationFullImageDataManagerConfig
-from bad_gaussians.image_restoration_trainer import ImageRestorationTrainerConfig
-from bad_gaussians.bad_gaussians import BadGaussiansModelConfig
 from bad_gaussians.image_restoration_pipeline import ImageRestorationPipelineConfig
+from bad_gaussians.image_restoration_trainer import ImageRestorationTrainerConfig
 
 
 bad_gaussians = MethodSpecification(
@@ -40,6 +40,12 @@ bad_gaussians = MethodSpecification(
             model=BadGaussiansModelConfig(
                 camera_optimizer=BadCameraOptimizerConfig(mode="linear", num_virtual_views=10),
                 use_scale_regularization=True,
+                continue_cull_post_densification=False,
+                cull_alpha_thresh=5e-3,
+                densify_grad_thresh=4e-4,
+                num_downscales=0,
+                resolution_schedule=250,
+                tv_loss_lambda=None,
             ),
         ),
         optimizers={

@@ -100,6 +100,25 @@ class DeblurNerfDataParser(ColmapDataParser):
 
         return outputs
 
+    def _check_suffixes(self, filenames):
+        """
+        Check if the file path exists. if not, check if the file path with the correct suffix exists.
+        """
+        for i, filename in enumerate(filenames):
+            if not (self.config.data / self.config.images_path / filename).exists():
+                flag_found = False
+                exts=[".png", ".PNG", ".jpg", ".JPG"]
+                for ext in exts:
+                    new_filename = filename.with_suffix(ext)
+                    if (self.config.data / self.config.images_path / new_filename).exists():
+                        filenames[i] = new_filename
+                        flag_found = True
+                        break
+                if not flag_found:
+                    print(f"[WARN] {filename} not found in the images directory.")
+
+        return filenames
+
     def _generate_dataparser_outputs(self, split="train"):
         assert self.config.data.exists(), f"Data directory {self.config.data} does not exist."
 
@@ -110,6 +129,8 @@ class DeblurNerfDataParser(ColmapDataParser):
                 print(f"[INFO] defaulting hold={self.config.eval_interval}")
             else:
                 self.config.eval_interval = int(hold_file[0].split('=')[-1])
+                if self.config.eval_interval < 1:
+                    self.config.eval_mode = "all"
 
         gt_folder_path = self.config.data / "images_test"
         if gt_folder_path.exists():
@@ -128,7 +149,7 @@ class DeblurNerfDataParser(ColmapDataParser):
         if self.config.drop_distortion:
             for camera in outputs.cameras:
                 camera.distortion_params = None
-        # outputs.image_filenames = [f.with_suffix('.png') for f in outputs.image_filenames]
+        outputs.image_filenames = self._check_suffixes(outputs.image_filenames)
         outputs = self._check_outputs(outputs)
 
         return outputs

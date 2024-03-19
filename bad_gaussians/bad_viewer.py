@@ -1,4 +1,4 @@
-'''Viewer of BAD-Gaussianss'''
+'''Viewer of BAD-Gaussians'''
 import numpy as np
 import torch
 import viser.transforms as vtf
@@ -9,7 +9,7 @@ from bad_gaussians.bad_camera_optimizer import BadCameraOptimizer
 
 
 class BadViewer(Viewer):
-    # BAD-Gaussianss: Overriding original update_camera_poses because BadNerfCameraOptimizer returns LieTensor
+    # BAD-Gaussians: Overriding original update_camera_poses because BadNerfCameraOptimizer returns LieTensor
     def update_camera_poses(self):
         # TODO this fn accounts for like ~5% of total train time
         # Update the train camera locations based on optimization

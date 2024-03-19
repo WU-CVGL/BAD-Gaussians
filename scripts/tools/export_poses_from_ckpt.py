@@ -38,13 +38,9 @@ def export_poses(ckpt_path, data_dir, output_path):
     ckpt = torch.load(ckpt_path, map_location=DEVICE)
     pose_adjustment = ckpt['pipeline']['_model.camera_optimizer.pose_adjustment']
 
-    # parser = BadNerfColmapDataParserConfig(data=data_dir, colmap_path="sparse/0").setup()
-    # parser = DeblurNerfDataParserConfig(data=data_dir, downscale_factor=1).setup()
     parser = DeblurNerfDataParserConfig(
         data=data_dir,
         downscale_factor=1,
-        images_path="images_1",
-        eval_mode="all",
     ).setup()
     parser_outputs = parser.get_dataparser_outputs(split="train")
 
@@ -69,7 +65,6 @@ def export_poses(ckpt_path, data_dir, output_path):
     print(poses.shape)
     print(poses_delta.shape)
     poses_optimized = poses @ poses_delta
-    # poses_optimized = poses
 
     timestamps = [float(x) for x in range(num_cameras)]
 

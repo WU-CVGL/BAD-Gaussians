@@ -52,9 +52,8 @@ def main():
     linear_spline = linear_spline_config.setup()
     cubic_spline = cubic_spline_config.setup()
 
-    for pose in tum_trajectory:
-        linear_spline.insert(pose[None, :])
-        cubic_spline.insert(pose[None, :])
+    linear_spline.set_data(tum_trajectory)
+    cubic_spline.set_data(tum_trajectory)
 
     # read timestamps from times_path
     timestamps = []

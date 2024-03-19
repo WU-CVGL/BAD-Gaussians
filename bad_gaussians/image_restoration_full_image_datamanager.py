@@ -84,7 +84,7 @@ class ImageRestorationFullImageDataManager(FullImageDatamanager):  # pylint: dis
         data["image"] = data["image"].to(self.device)
         assert len(self.eval_dataset.cameras.shape) == 1, "Assumes single batch dimension"
         camera = self.eval_dataset.cameras[image_idx : image_idx + 1].to(self.device)
-        # BAD-Gaussianss: pass camera index to BadNerfCameraOptimizer
+        # BAD-Gaussians: pass camera index to BadNerfCameraOptimizer
         if camera.metadata is None:
             camera.metadata = {}
         camera.metadata["cam_idx"] = image_idx

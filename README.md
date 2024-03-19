@@ -139,15 +139,35 @@ ns-train bad-gaussians \
 
 ### 4. Render videos
 
+This command will load the `config.yml` and save the video to `renders/<your_filename>.mp4`:
+
 ```bash
 ns-render interpolate \
-  --load-config outputs/tanabata/bad-gaussians/<your_experiment_date_time>/config.yml \
+  --load-config outputs/blurtanabata/bad-gaussians/<your_experiment_date_time>/config.yml \
   --render-nearest-camera True \
   --order-poses True \
   --output-path renders/<your_filename>.mp4
 ```
 
-### 5. Debug with your IDE
+> Note: The working directory when executing this command must be the parent of `outputs`, i.e. the same directory when training.
+
+### 5. Export the 3D Gaussians
+
+This command will load the `config.yml` and export a `splat.ply` into the same folder:
+
+```bash
+ns-export gaussian-splat \
+    --load-config outputs/blurtanabata/bad-gaussians/<your_experiment_date_time>/config.yml \
+    --output-dir outputs/blurtanabata/bad-gaussians/<your_experiment_date_time>
+```
+
+> Note1: We use `rasterize_mode = antialiased` by default. However, if you want to export the 3D gaussians, since the `antialiased` mode (i.e. *Mip-Splatting*) is not supported by most 3D-GS viewers, it is better to turn if off during training using: `--pipeline.model.rasterize_mode "classic"`
+>
+> Note2: The working directory when executing this command must be the parent of `outputs`, i.e. the same directory when training.
+
+Then you can visualize this file with any viewer, for example the [WebGL Viewer](https://antimatter15.com/splat/).
+
+### 6. Debug with your IDE
 
 Open this repo with your IDE, create a configuration, and set the executing python script path to
 `<nerfstudio_path>/nerfstudio/scripts/train.py`, with the parameters above.

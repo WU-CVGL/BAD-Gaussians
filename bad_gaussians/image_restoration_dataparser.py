@@ -135,7 +135,7 @@ class ImageRestorationDataParser(Nerfstudio):
             image_filenames.append(fname)
             poses_dict[fname.stem] = np.array(frame["transform_matrix"])
 
-        # BAD-Gaussianss: in image restoration tasks (deblur), every degraded train image has a corresponding GT test image
+        # BAD-Gaussians: in image restoration tasks (deblur), every degraded train image has a corresponding GT test image
         num_images = len(image_filenames)
         image_filenames = sorted(image_filenames)
         if split in ["val", "test"]:

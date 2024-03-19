@@ -42,7 +42,7 @@ class ImageRestorationTrainer(Trainer):
         Args:
             test_mode: The test mode to use.
         """
-        # BAD-Gaussianss: Overriding original setup since we want to use our BadNerfViewer
+        # BAD-Gaussians: Overriding original setup since we want to use our BadNerfViewer
         self.pipeline = self.config.pipeline.setup(
             device=self.device,
             test_mode=test_mode,
@@ -97,7 +97,7 @@ class ImageRestorationTrainer(Trainer):
         writer.put_config(name="config", config_dict=dataclasses.asdict(self.config), step=0)
         profiler.setup_profiler(self.config.logging, writer_log_path)
 
-        # BAD-Gaussianss: disable eval if no eval images
+        # BAD-Gaussians: disable eval if no eval images
         if self.pipeline.datamanager.eval_dataset.cameras is None:
             self.config.steps_per_eval_all_images = int(9e9)
             self.config.steps_per_eval_batch = int(9e9)
@@ -134,6 +134,6 @@ class ImageRestorationTrainer(Trainer):
 
         # all eval images
         if step_check(step, self.config.steps_per_eval_all_images):
-            # BAD-Gaussianss: pass output_path to save rendered images
+            # BAD-Gaussians: pass output_path to save rendered images
             metrics_dict = self.pipeline.get_average_eval_image_metrics(step=step, output_path=self.base_dir)
             writer.put_dict(name="Eval Images Metrics Dict (all images)", scalar_dict=metrics_dict, step=step)

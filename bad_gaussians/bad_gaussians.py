@@ -18,13 +18,13 @@ from nerfstudio.cameras.cameras import Cameras
 from nerfstudio.data.scene_box import OrientedBox
 from nerfstudio.models.splatfacto import SplatfactoModel, SplatfactoModelConfig
 from nerfstudio.model_components import renderers
+from nerfstudio.utils import colormaps
 
 from bad_gaussians.bad_camera_optimizer import (
     BadCameraOptimizer,
     BadCameraOptimizerConfig,
     TrajSamplingMode,
 )
-from bad_gaussians.image_restoration_model_common import get_restoration_eval_image_metrics_and_images
 from bad_gaussians.bad_losses import EdgeAwareVariationLoss
 
 
@@ -123,7 +123,7 @@ class BadGaussiansModel(SplatfactoModel):
 
         is_training = self.training and torch.is_grad_enabled()
 
-        # BAD-Gaussianss: get virtual cameras
+        # BAD-Gaussians: get virtual cameras
         virtual_cameras = self.camera_optimizer.apply_to_camera(camera, mode)
 
         if is_training:
@@ -156,7 +156,7 @@ class BadGaussiansModel(SplatfactoModel):
         for cam in virtual_cameras:
             cam.rescale_output_resolution(1 / camera_downscale)
 
-        # BAD-Gaussianss: render virtual views
+        # BAD-Gaussians: render virtual views
         virtual_views_rgb = []
         virtual_views_alpha = []
         for cam in virtual_cameras:
@@ -294,7 +294,7 @@ class BadGaussiansModel(SplatfactoModel):
         """
         assert camera is not None, "must provide camera to gaussian model"
         self.set_crop(obb_box)
-        # BAD-Gaussianss: camera.to(device) will drop metadata
+        # BAD-Gaussians: camera.to(device) will drop metadata
         metadata = camera.metadata
         camera = camera.to(self.device)
         camera.metadata = metadata
@@ -314,6 +314,48 @@ class BadGaussiansModel(SplatfactoModel):
     def get_image_metrics_and_images(
             self, outputs: Dict[str, Tensor], batch: Dict[str, Tensor]
     ) -> Tuple[Dict[str, float], Dict[str, Tensor]]:
-        metrics_dict, images_dict = get_restoration_eval_image_metrics_and_images(self, outputs, batch)
+        gt_rgb = self.composite_with_background(self.get_gt_img(batch["image"]), outputs["background"])
+        d = self._get_downscale_factor()
+        if d > 1:
+            # torchvision can be slow to import, so we do it lazily.
+            import torchvision.transforms.functional as TF
+
+            newsize = [batch["image"].shape[0] // d, batch["image"].shape[1] // d]
+            predicted_rgb = TF.resize(outputs["rgb"].permute(2, 0, 1), newsize, antialias=None).permute(1, 2, 0)
+        else:
+            predicted_rgb = outputs["rgb"]
+
+        gt_rgb = gt_rgb[..., :3].to(self.device)
+        degraded_rgb = batch["degraded"][:, :, :3].to(self.device)
+        combined_rgb = torch.cat([degraded_rgb, predicted_rgb, gt_rgb], dim=1)
+
+        if "accumulation" in outputs:
+            accumulation = outputs["accumulation"]
+            acc = colormaps.apply_colormap(outputs["accumulation"])
+            combined_acc = torch.cat([acc], dim=1)
+        else:
+            accumulation = None
+
+        depth = colormaps.apply_depth_colormap(
+            outputs["depth"],
+            accumulation=accumulation,
+        )
+        combined_depth = torch.cat([depth], dim=1)
+
+        images_dict = {"img": combined_rgb, "depth": combined_depth}
+        if "accumulation" in outputs:
+            images_dict["accumulation"] = combined_acc
+
+        # Switch images from [H, W, C] to [1, C, H, W] for metrics computations
+        gt_rgb = torch.moveaxis(gt_rgb, -1, 0)[None, ...]
+        predicted_rgb = torch.moveaxis(predicted_rgb, -1, 0)[None, ...]
+
+        psnr = self.psnr(gt_rgb, predicted_rgb)
+        ssim = self.ssim(gt_rgb, predicted_rgb)
+        lpips = self.lpips(gt_rgb, predicted_rgb)
+
+        # all of these metrics will be logged as scalars
+        metrics_dict = {"psnr": float(psnr.item()), "ssim": float(ssim)}  # type: ignore
+        metrics_dict["lpips"] = float(lpips)
 
         return metrics_dict, images_dict

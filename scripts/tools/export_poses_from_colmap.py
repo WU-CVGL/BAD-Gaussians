@@ -15,7 +15,7 @@ DEVICE = 'cpu'
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Export poses from colmap images.txt.")
+    parser = argparse.ArgumentParser(description="Export poses from colmap results to TUM trajectory.")
     parser.add_argument("--input", type=str, required=True, help="Path to colmap files. E.g. ./sparse/0")
     parser.add_argument("--output", type=str, required=True, help="Path to the output TUM trajectory.")
     args = parser.parse_args()
