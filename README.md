@@ -40,8 +40,8 @@ pip install -e .
 Then you can clone and install this repo as a Python package with:
 
 ```bash
-git clone https://github.com/WU-CVGL/Bad-RFs
-cd Bad-RFs
+git clone https://github.com/WU-CVGL/BAD-Gaussians
+cd BAD-Gaussians
 pip install -e .
 ```
 
