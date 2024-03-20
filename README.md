@@ -139,17 +139,22 @@ ns-train bad-gaussians \
 
 ### 4. Render videos
 
-This command will load the `config.yml` and save the video to `renders/<your_filename>.mp4`:
+This command will generate a trajectory with the camera poses of the training images, keeping their original order, interplate 10 frames between adjacent images with a frame rate of 30. It will load the `config.yml` and save the video to `renders/<your_filename>.mp4`.
 
 ```bash
 ns-render interpolate \
   --load-config outputs/blurtanabata/bad-gaussians/<your_experiment_date_time>/config.yml \
-  --render-nearest-camera True \
-  --order-poses True \
+  --pose-source train \
+  --frame-rate 30 \
+  --interpolation-steps 10 \
   --output-path renders/<your_filename>.mp4
 ```
 
-> Note: The working directory when executing this command must be the parent of `outputs`, i.e. the same directory when training.
+> Note1: You can add the `--render-nearest-camera True` option to compare with the blurry inputs, but it will slow down the rendering process significantly.
+>
+> Note2: The working directory when executing this command must be the parent of `outputs`, i.e. the same directory when training.
+>
+> Note3: You can find more information of this command in the [nerfstudio docs](https://docs.nerf.studio/reference/cli/ns_render.html#ns-render).
 
 ### 5. Export the 3D Gaussians
 
