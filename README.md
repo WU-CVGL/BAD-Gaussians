@@ -1,5 +1,8 @@
 <h1 align=center font-weight:100> 😈<strong><i>BAD-Gaussians</i></strong>: <strong><i>B</i></strong>undle-<strong><i>A</i></strong>djusted <strong><i>D</i></strong>eblur Gaussian Splatting</h1>
 
+<a href="https://arxiv.org/abs/2403.11831"><img src="https://img.shields.io/badge/arXiv-2403.11831-b31b1b.svg"></a>
+<a href="https://lingzhezhao.github.io/BAD-Gaussians/"><img src="https://img.shields.io/badge/Project-Page-green.svg"/></a>
+
 This as an official implementation of our arXiv 2024 paper 
 [**BAD-Gaussians**: Bundle Adjusted Deblur Gaussian Splatting](https://lingzhezhao.github.io/BAD-Gaussians/), based on the [nerfstudio](https://github.com/nerfstudio-project/nerfstudio) framework.
 
@@ -7,7 +10,7 @@ This as an official implementation of our arXiv 2024 paper
 
 Deblurring & novel-view synthesis results on [Deblur-NeRF](https://github.com/limacv/Deblur-NeRF/)'s real-world motion-blurred data:
 
-<video src="https://github.com/WU-CVGL/BAD-Gaussians/assets/43722188/58a24441-59f9-4232-8862-785e14038de6"></video>
+<video src="https://github.com/WU-CVGL/BAD-Gaussians/assets/43722188/703fbf8d-adb8-4472-b685-6dbe45bb0057"></video>
 
 > Left: BAD-Gaussians deblured novel-view renderings;
 >
