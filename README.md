@@ -37,6 +37,7 @@ Our `bad-gaussians` currently relies on [our fork of `gsplat`](https://github.co
 ```bash
 git clone https://github.com/LingzheZhao/gsplat
 cd gsplat
+git submodule update --init --recursive
 pip install -e .
 ```
 
