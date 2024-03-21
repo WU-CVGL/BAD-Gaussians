@@ -35,9 +35,7 @@ pip install pypose
 Our `bad-gaussians` currently relies on [our fork of `gsplat`](https://github.com/LingzheZhao/gsplat), you can install it with:
 
 ```bash
-git clone https://github.com/LingzheZhao/gsplat
-cd gsplat
-pip install -e .
+pip install git+https://github.com/LingzheZhao/gsplat
 ```
 
 Then you can clone and install this repo as a Python package with:
