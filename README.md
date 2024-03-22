@@ -79,64 +79,67 @@ You can directly download the `real_camera_motion_blur` folder from [Deblur-NeRF
         --output-dir data/my_data/blurtanabata
     ```
 
-2. Copy the testing images (ground truth sharp images) to the new folder
+2. The folder `data/my_data/blurtanabata` is ready.
 
-    ```
-    cp llff_data/blurtanabata/images_test data/my_data/blurtanabata/
-    ```
-
-3. The folder `data/my_data/blurtanabata` is ready.
-
-> Note1: If you do not have the testing images, e.g. when training with real-world data
-> (like those in [Deblur-NeRF](https://limacv.github.io/deblurnerf/)), you can skip the step 2.
->
-> Note2: In our `Dataparser`s, since nerfstudio does not model the NDC scene contraction for LLFF data,
-> we set `scale_factor = 0.25`, which works well on LLFF datasets.
-> If your data is not captured in a LLFF fashion (i.e. forward-facing), such as object-centric like Mip-NeRF 360,
-> you can set the `scale_factor = 1.`, 
-> e.g., `ns-train bad-gaussians --data data/my_data/my_seq --vis viewer+tensorboard image-restore-data --scale_factor 1`
+> Note: Although nerfstudio does not model the NDC scene contraction for LLFF data, 
+> we found that `scale_factor = 0.25` works well on LLFF datasets.
+> If your data is captured in a [LLFF fashion](https://github.com/Fyusion/LLFF#using-your-own-input-images-for-view-synthesis) (i.e. forward-facing), 
+> instead of object-centric like Mip-NeRF 360, 
+> you can pass the `scale_factor = 0.25` parameter to the nerfstudio dataparser (which is already set to default in our `DeblurNerfDataParser`),
+> e.g., `ns-train bad-gaussians --data data/my_data/my_seq --vis viewer+tensorboard nerfstudio-data --scale_factor 0.25`
 
 ### 3. Training
 
-For `Deblur-NeRF synthetic` dataset, train with:
+1. For `Deblur-NeRF synthetic` dataset, train with:
 
-```bash
-ns-train bad-gaussians \
-    --data data/bad-nerf-gtK-colmap-nvs/blurtanabata \
-    --vis viewer+tensorboard \
-    deblur-nerf-data
-```
+    ```bash
+    ns-train bad-gaussians \
+        --data data/bad-nerf-gtK-colmap-nvs/blurtanabata \
+        --vis viewer+tensorboard \
+        deblur-nerf-data
+    ```
 
-For `Deblur-NeRF real` dataset with `downscale_factor=4`, train with:
-```bash
-ns-train bad-gaussians \
-    --data data/real_camera_motion_blur/blurdecoration \
-    --pipeline.model.camera-optimizer.mode "cubic" \
-    --vis viewer+tensorboard \
-    deblur-nerf-data \
-    --downscale_factor 4
-```
+2. For `Deblur-NeRF real` dataset with `downscale_factor=4`, train with:
+    ```bash
+    ns-train bad-gaussians \
+        --data data/real_camera_motion_blur/blurdecoration \
+        --pipeline.model.camera-optimizer.mode "cubic" \
+        --vis viewer+tensorboard \
+        deblur-nerf-data \
+        --downscale_factor 4
+    ```
+    where
+    - `--pipeline.model.camera-optimizer.mode "cubic"` enables cubic B-spline;
+    - `--downscale_factor 4` after the `deblur-nerf-data` tells the DeblurNerfDataparser to downscale the images' width and height to `1/4` of its originals.
 
-For `Deblur-NeRF real` dataset with full resolution, train with:
-```bash
-ns-train bad-gaussians \
-    --data data/real_camera_motion_blur/blurdecoration \
-    --pipeline.model.camera-optimizer.mode "cubic" \
-    --pipeline.model.camera-optimizer.num_virtual_views 15 \
-    --pipeline.model.num_downscales 2 \
-    --pipeline.model.resolution_schedule 3000 \
-    --vis viewer+tensorboard \
-    deblur-nerf-data
-```
+3. For `Deblur-NeRF real` dataset with *full resolution*, train with:
+    ```bash
+    ns-train bad-gaussians \
+        --data data/real_camera_motion_blur/blurdecoration \
+        --pipeline.model.camera-optimizer.mode "cubic" \
+        --pipeline.model.camera-optimizer.num_virtual_views 15 \
+        --pipeline.model.num_downscales 2 \
+        --pipeline.model.resolution_schedule 3000 \
+        --vis viewer+tensorboard \
+        deblur-nerf-data
+    ```
+    where
+    - `--pipeline.model.camera-optimizer.mode "cubic"` enables cubic B-spline;
+    - `--pipeline.model.camera-optimizer.num_virtual_views 15` increases the number of virtual cameras to 15;
+    - `--pipeline.model.num_downscales 2` and `--pipeline.model.resolution_schedule 3000` enables coarse-to-fine training.
 
-For custom data processed with `ns-process-data`, train with:
+4. For custom data processed with `ns-process-data`, train with:
 
-```bash
-ns-train bad-gaussians \
-    --data data/my_data/blurtanabata \
-    --vis viewer+tensorboard \
-    image-restore-data
-```
+    ```bash
+    ns-train bad-gaussians \
+        --data data/my_data/blurtanabata \
+        --vis viewer+tensorboard \
+        nerfstudio-data --eval_mode "all"
+    ```
+
+    > Note: To improve reconstruction quality on your custom dataset, you may need to add 
+    some of the parameters to enable *cubic B-spline*, *more virtual cameras* and
+    *coarse-to-fine training*, as shown in the examples above.
 
 ### 4. Render videos
 
