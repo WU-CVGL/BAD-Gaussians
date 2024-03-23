@@ -20,7 +20,6 @@ generated-members = ["numpy.*", "torch.*", "cv2.*", "cv.*"]
 include = ["bad_gaussians"]
 
 [project.entry-points.'nerfstudio.dataparser_configs']
-image-restore-data = 'bad_gaussians.bad_config_dataparser:ImageRestoreDataParser'
 deblur-nerf-data = 'bad_gaussians.bad_config_dataparser:DeblurNerfDataParser'
 
 [project.entry-points.'nerfstudio.method_configs']

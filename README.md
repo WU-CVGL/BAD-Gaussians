@@ -98,9 +98,15 @@ You can directly download the `real_camera_motion_blur` folder from [Deblur-NeRF
     ```bash
     ns-train bad-gaussians \
         --data data/bad-nerf-gtK-colmap-nvs/blurtanabata \
+        --pipeline.model.camera-optimizer.mode "linear" \
         --vis viewer+tensorboard \
         deblur-nerf-data
     ```
+    where
+    - `--data data/bad-nerf-gtK-colmap-nvs/blurtanabata` is the relative path of the data sequence;
+    - `--pipeline.model.camera-optimizer.mode "linear"` enables linear camera pose interpolation
+    - `--vis viewer+tensorboard` enables both the viewer and the tensorboard metrics saving
+    - `deblur-nerf-data` chooses the DeblurNerfDataparser
 
 2. For `Deblur-NeRF real` dataset with `downscale_factor=4`, train with:
     ```bash

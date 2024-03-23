@@ -38,7 +38,7 @@ class BadCameraOptimizerConfig(CameraOptimizerConfig):
     _target: Type = field(default_factory=lambda: BadCameraOptimizer)
     """The target class to be instantiated."""
 
-    mode: Literal["off", "linear", "cubic"] = "off"
+    mode: Literal["off", "linear", "cubic"] = "linear"
     """Pose optimization strategy to use.
     linear: linear interpolation on SE(3);
     cubic: cubic b-spline interpolation on SE(3)."""

@@ -310,3 +310,14 @@ class BadGaussiansModel(SplatfactoModel):
         # Add loss from camera optimizer
         self.camera_optimizer.get_loss_dict(loss_dict)
         return loss_dict
+
+    def get_metrics_dict(self, outputs, batch) -> Dict[str, torch.Tensor]:
+        metrics_dict = super().get_metrics_dict(outputs, batch)
+        # Add metrics from camera optimizer
+        self.camera_optimizer.get_metrics_dict(metrics_dict)
+        return metrics_dict
+
+    def get_param_groups(self) -> Dict[str, List[torch.nn.Parameter]]:
+        param_groups = super().get_param_groups()
+        self.camera_optimizer.get_param_groups(param_groups=param_groups)
+        return param_groups

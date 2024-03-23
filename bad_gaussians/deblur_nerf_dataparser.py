@@ -4,17 +4,38 @@ Data parser for Deblur-NeRF COLMAP datasets.
 
 from __future__ import annotations
 
+import glob
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal, Optional, Type
+from typing import List, Literal, Optional, Type
 
 import cv2
 import torch
-
 from nerfstudio.data.dataparsers.colmap_dataparser import ColmapDataParser, ColmapDataParserConfig
 
-from bad_gaussians.image_restoration_dataparser import _find_files
+
+def _find_files(directory: Path, exts: List[Path]):
+    """Find all files in a directory that have a certain file extension.
+
+    Args:
+        directory : The directory to search for files.
+        exts :  A list of file extensions to search for. Each file extension should be in the form '*.ext'.
+
+    Returns:
+        A list of file paths for all the files that were found. The list is sorted alphabetically.
+    """
+    assert directory.exists()
+    if os.path.isdir(directory):
+        # types should be ['*.png', '*.jpg', '*.JPG', '*.PNG']
+        files_grabbed = []
+        for ext in exts:
+            files_grabbed.extend(glob.glob(os.path.join(directory, ext)))
+        if len(files_grabbed) > 0:
+            files_grabbed = sorted(list(set(files_grabbed)))
+        files_grabbed = [Path(f) for f in files_grabbed]
+        return files_grabbed
+    return []
 
 
 @dataclass
@@ -66,7 +87,7 @@ class DeblurNerfDataParser(ColmapDataParser):
         Check if the colmap outputs are estimated on downscaled data. If so, correct the camera parameters.
         """
         # load the first image to get the image size
-        image = cv2.imread(str(self.config.data / self.config.images_path / outputs.image_filenames[0]))
+        image = cv2.imread(str(outputs.image_filenames[0]))
         # get the image size
         h, w = image.shape[:2]
         # check if the cx and cy are in the correct range
@@ -105,12 +126,12 @@ class DeblurNerfDataParser(ColmapDataParser):
         Check if the file path exists. if not, check if the file path with the correct suffix exists.
         """
         for i, filename in enumerate(filenames):
-            if not (self.config.data / self.config.images_path / filename).exists():
+            if not filename.exists():
                 flag_found = False
-                exts=[".png", ".PNG", ".jpg", ".JPG"]
+                exts = [".png", ".PNG", ".jpg", ".JPG"]
                 for ext in exts:
                     new_filename = filename.with_suffix(ext)
-                    if (self.config.data / self.config.images_path / new_filename).exists():
+                    if new_filename.exists():
                         filenames[i] = new_filename
                         flag_found = True
                         break
