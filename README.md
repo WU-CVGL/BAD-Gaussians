@@ -35,6 +35,9 @@ pip install pypose
 Our `bad-gaussians` currently relies on [our fork of `gsplat`](https://github.com/LingzheZhao/gsplat), you can install it with:
 
 ```bash
+# make sure old version is uninstalled
+pip uninstall gsplat
+# install the forked version with camera pose gradient enabled
 pip install git+https://github.com/LingzheZhao/gsplat
 ```
 
