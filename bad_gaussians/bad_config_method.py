@@ -3,13 +3,13 @@ BAD-Gaussians configs.
 """
 
 from nerfstudio.configs.base_config import ViewerConfig
+from nerfstudio.data.dataparsers.nerfstudio_dataparser import NerfstudioDataParserConfig
 from nerfstudio.engine.optimizers import AdamOptimizerConfig
 from nerfstudio.engine.schedulers import ExponentialDecaySchedulerConfig
 from nerfstudio.plugins.types import MethodSpecification
 
 from bad_gaussians.bad_camera_optimizer import BadCameraOptimizerConfig
 from bad_gaussians.bad_gaussians import BadGaussiansModelConfig
-from bad_gaussians.image_restoration_dataparser import ImageRestorationDataParserConfig
 from bad_gaussians.image_restoration_full_image_datamanager import ImageRestorationFullImageDataManagerConfig
 from bad_gaussians.image_restoration_pipeline import ImageRestorationPipelineConfig
 from bad_gaussians.image_restoration_trainer import ImageRestorationTrainerConfig
@@ -31,7 +31,7 @@ bad_gaussians = MethodSpecification(
             eval_render_estimated=True,
             datamanager=ImageRestorationFullImageDataManagerConfig(
                 cache_images="gpu",  # reduce CPU usage, caused by pin_memory()?
-                dataparser=ImageRestorationDataParserConfig(
+                dataparser=NerfstudioDataParserConfig(
                     load_3D_points=True,
                     eval_mode="interval",
                     eval_interval=8,
