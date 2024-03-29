@@ -15,7 +15,7 @@ import torch
 from nerfstudio.data.dataparsers.colmap_dataparser import ColmapDataParser, ColmapDataParserConfig
 
 
-def _find_files(directory: Path, exts: List[Path]):
+def _find_files(directory: Path, exts: List[str]) -> List[Path]:
     """Find all files in a directory that have a certain file extension.
 
     Args:
