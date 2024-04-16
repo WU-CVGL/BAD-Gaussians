@@ -199,7 +199,6 @@ class BadGaussiansModel(SplatfactoModel):
                 1,
                 quats_crop / quats_crop.norm(dim=-1, keepdim=True),
                 viewmat.squeeze()[:3, :],
-                None,  # Deprecated projmat
                 cam.fx.item(),
                 cam.fy.item(),
                 cam.cx.item(),

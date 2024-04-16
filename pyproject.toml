@@ -1,9 +1,9 @@
 [project]
 name = "bad_gaussians"
-version = "1.0.2"
+version = "1.0.3"
 
 dependencies=[
-    "nerfstudio>=1.0.2",
+    "nerfstudio>=1.0.3",
     "pypose"
 ]
 

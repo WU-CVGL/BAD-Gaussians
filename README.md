@@ -22,7 +22,7 @@ Deblurring & novel-view synthesis results on [Deblur-NeRF](https://github.com/li
 ### 1. Installation
 
 You may check out the original [`nerfstudio`](https://github.com/nerfstudio-project/nerfstudio) repo for prerequisites and dependencies. 
-Currently, our codebase is build on top of the latest version of nerfstudio (v1.0.2),
+Currently, our codebase is build on top of the latest version of nerfstudio (v1.0.3),
 so if you have an older version of nerfstudio installed,
 please `git clone` the main branch and install the latest version.
 
@@ -50,15 +50,6 @@ Besides, we use [pypose](https://github.com/pypose/pypose) to implement the pose
 
 ```bash
 pip install pypose
-```
-
-Our `bad-gaussians` currently relies on [our fork of `gsplat`](https://github.com/LingzheZhao/gsplat), you can install it with:
-
-```bash
-# make sure old version is uninstalled
-pip uninstall gsplat
-# install the forked version with camera pose gradient enabled
-pip install git+https://github.com/LingzheZhao/gsplat
 ```
 
 Then you can clone and install this repo as a Python package with:
