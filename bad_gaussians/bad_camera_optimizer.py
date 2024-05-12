@@ -81,7 +81,7 @@ class BadCameraOptimizer(CameraOptimizer):
 
         # Initialize learnable parameters.
         if self.config.mode == "off":
-            pass
+            return
         elif self.config.mode == "linear":
             self.num_control_knots = 2
         elif self.config.mode == "cubic":
@@ -136,10 +136,7 @@ class BadCameraOptimizer(CameraOptimizer):
 
         # Return: identity if no transforms are needed, otherwise composite transforms together.
         if len(outputs) == 0:
-            return pp.identity_SE3(
-                *(indices.shape[0], self.num_control_knots),
-                device=self.pose_adjustment.device
-            )
+            return pp.identity_SE3(*indices.shape, device=self.device)
         return functools.reduce(pp.mul, outputs)
 
     def _interpolate(
@@ -225,10 +222,9 @@ class BadCameraOptimizer(CameraOptimizer):
 
     def apply_to_camera(self, camera: Cameras, mode: TrajSamplingMode) -> List[Cameras]:
         """Apply pose correction to the camera"""
-        assert self.config.mode != "off"
         # assert camera.metadata is not None, "Must provide camera metadata"
         # assert "cam_idx" in camera.metadata, "Must provide id of camera in its metadata"
-        if camera.metadata is None or not ("cam_idx" in camera.metadata):
+        if self.config.mode == "off" or camera.metadata is None or not ("cam_idx" in camera.metadata):
             # print("[WARN] Cannot get cam_idx in camera.metadata")
             return [deepcopy(camera)]
 

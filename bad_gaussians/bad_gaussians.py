@@ -8,7 +8,6 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Literal, Optional, Tuple, Type, Union
 
 import torch
-from torch import Tensor
 
 from gsplat.project_gaussians import project_gaussians
 from gsplat.rasterize import rasterize_gaussians
@@ -18,7 +17,6 @@ from nerfstudio.cameras.cameras import Cameras
 from nerfstudio.data.scene_box import OrientedBox
 from nerfstudio.models.splatfacto import SplatfactoModel, SplatfactoModelConfig
 from nerfstudio.model_components import renderers
-from nerfstudio.utils import colormaps
 
 from bad_gaussians.bad_camera_optimizer import (
     BadCameraOptimizer,
