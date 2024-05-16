@@ -6,6 +6,7 @@ Created by lzzhao on 2023.09.19
 from __future__ import annotations
 
 import pypose as pp
+import scipy
 import torch
 from jaxtyping import Float
 from pypose import LieTensor
@@ -138,4 +139,43 @@ def cubic_bspline_interpolation(
     q_t = pp.cumprod(q_ts, dim=-3, left=False)[..., -1, :, :]
 
     ret = pp.SE3(torch.cat([t_t, q_t], dim=-1))
+    return ret
+
+def bezier_interpolation(
+        ctrl_knots: Float[LieTensor, "*batch_size order 7"],
+        u: Float[Tensor, "interpolations"] | Float[Tensor, "*batch_size interpolations"],
+        enable_eps: bool = False,
+) -> Float[LieTensor, "*batch_size interpolations 7"]:
+    """Bezier interpolation with batches of four SE(3) control knots.
+    Args:
+        ctrl_knots: The control knots.
+        u: Normalized positions on the trajectory segments. Range: [0, 1].
+        enable_eps: Whether to clip the normalized position with a small epsilon to avoid possible numerical issues.
+    Returns:
+        The interpolated poses.
+    """
+    batch_size = ctrl_knots.shape[:-2]
+    order = ctrl_knots.shape[-2]
+    degree = order - 1
+    interpolations = u.shape[-1]
+    binomial_coeffs = [scipy.special.binom(degree, k) for k in range(order)]
+
+    # If u only has one dim, broadcast it to all batches. This means same interpolations for all batches.
+    # Otherwise, u should have the same batch size as the control knots (*batch_size, interpolations).
+    if u.dim() == 1:
+        u = u.tile((*batch_size, 1))  # (*batch_size, interpolations)
+    if enable_eps:
+        u = torch.clip(u, _EPS, 1.0 - _EPS)
+
+    # Build coefficient matrix.
+    bezier_coeffs = []
+    for i in range(order):
+        coeff_i = binomial_coeffs[i] * pow(1 - u, degree - i) * pow(u, i)
+        bezier_coeffs.append(coeff_i)
+    bezier_coeffs = torch.stack(bezier_coeffs, dim=1).float().to(ctrl_knots.device)  # (*batch_size, order, interpolations)
+
+    # (*batch_size, order, interpolations, 7)
+    weighted_ctrl_knots = pp.se3(bezier_coeffs.unsqueeze(-1) * ctrl_knots.Log().unsqueeze(-2)).Exp()
+    ret = pp.cumprod(weighted_ctrl_knots, dim=-3, left=False)[..., -1, :, :]
+
     return ret

@@ -21,6 +21,7 @@ from nerfstudio.cameras.cameras import Cameras
 from nerfstudio.cameras.rays import RayBundle
 
 from bad_gaussians.spline_functor import (
+    bezier_interpolation,
     cubic_bspline_interpolation,
     linear_interpolation,
     linear_interpolation_mid,
@@ -38,10 +39,13 @@ class BadCameraOptimizerConfig(CameraOptimizerConfig):
     _target: Type = field(default_factory=lambda: BadCameraOptimizer)
     """The target class to be instantiated."""
 
-    mode: Literal["off", "linear", "cubic"] = "linear"
+    mode: Literal["off", "linear", "cubic", "bezier"] = "linear"
     """Pose optimization strategy to use.
     linear: linear interpolation on SE(3);
     cubic: cubic b-spline interpolation on SE(3)."""
+
+    bezier_degree: int = 9
+    """Degree of the Bezier curve. Only used when mode is bezier."""
 
     trans_l2_penalty: float = 0.0
     """L2 penalty on translation parameters."""
@@ -86,6 +90,8 @@ class BadCameraOptimizer(CameraOptimizer):
             self.num_control_knots = 2
         elif self.config.mode == "cubic":
             self.num_control_knots = 4
+        elif self.config.mode == "bezier":
+            self.num_control_knots = self.config.bezier_degree
         else:
             assert_never(self.config.mode)
 
@@ -155,6 +161,8 @@ class BadCameraOptimizer(CameraOptimizer):
                 return linear_interpolation(camera_opt, u)
             elif self.config.mode == "cubic":
                 return cubic_bspline_interpolation(camera_opt, u)
+            elif self.config.mode == "bezier":
+                return bezier_interpolation(camera_opt, u)
             else:
                 assert_never(self.config.mode)
         elif mode == "mid":
@@ -165,6 +173,8 @@ class BadCameraOptimizer(CameraOptimizer):
                     camera_opt,
                     torch.tensor([0.5], device=camera_opt.device)
                 ).squeeze(1)
+            elif self.config.mode == "bezier":
+                return bezier_interpolation(camera_opt, torch.tensor([0.5], device=camera_opt.device)).squeeze(1)
             else:
                 assert_never(self.config.mode)
         elif mode == "start":
@@ -175,6 +185,8 @@ class BadCameraOptimizer(CameraOptimizer):
                     camera_opt,
                     torch.tensor([0.0], device=camera_opt.device)
                 ).squeeze(1)
+            elif self.config.mode == "bezier":
+                return bezier_interpolation(camera_opt, torch.tensor([0.0], device=camera_opt.device)).squeeze(1)
             else:
                 assert_never(self.config.mode)
         elif mode == "end":
@@ -185,6 +197,8 @@ class BadCameraOptimizer(CameraOptimizer):
                     camera_opt,
                     torch.tensor([1.0], device=camera_opt.device)
                 ).squeeze(1)
+            elif self.config.mode == "bezier":
+                return bezier_interpolation(camera_opt, torch.tensor([1.0], device=camera_opt.device)).squeeze(1)
             else:
                 assert_never(self.config.mode)
         else:
