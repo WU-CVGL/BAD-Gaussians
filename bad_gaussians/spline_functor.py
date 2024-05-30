@@ -146,11 +146,13 @@ def bezier_interpolation(
         u: Float[Tensor, "interpolations"] | Float[Tensor, "*batch_size interpolations"],
         enable_eps: bool = False,
 ) -> Float[LieTensor, "*batch_size interpolations 7"]:
-    """Bezier interpolation with batches of four SE(3) control knots.
+    """Bezier interpolation with batches of SE(3) control knots.
+
     Args:
         ctrl_knots: The control knots.
         u: Normalized positions on the trajectory segments. Range: [0, 1].
         enable_eps: Whether to clip the normalized position with a small epsilon to avoid possible numerical issues.
+
     Returns:
         The interpolated poses.
     """
@@ -167,7 +169,7 @@ def bezier_interpolation(
     if enable_eps:
         u = torch.clip(u, _EPS, 1.0 - _EPS)
 
-    # Build coefficient matrix.
+    # Build coefficient matrix. TODO: precompute the coefficients.
     bezier_coeffs = []
     for i in range(order):
         coeff_i = binomial_coeffs[i] * pow(1 - u, degree - i) * pow(u, i)

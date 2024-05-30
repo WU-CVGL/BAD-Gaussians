@@ -42,7 +42,9 @@ class BadCameraOptimizerConfig(CameraOptimizerConfig):
     mode: Literal["off", "linear", "cubic", "bezier"] = "linear"
     """Pose optimization strategy to use.
     linear: linear interpolation on SE(3);
-    cubic: cubic b-spline interpolation on SE(3)."""
+    cubic: cubic b-spline interpolation on SE(3).
+    bezier: Bezier curve interpolation on SE(3).
+    """
 
     bezier_degree: int = 9
     """Degree of the Bezier curve. Only used when mode is bezier."""
