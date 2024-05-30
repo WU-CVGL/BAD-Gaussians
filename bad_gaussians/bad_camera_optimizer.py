@@ -206,35 +206,9 @@ class BadCameraOptimizer(CameraOptimizer):
         else:
             assert_never(mode)
 
-    def apply_to_raybundle(self, ray_bundle: RayBundle, mode: TrajSamplingMode) -> RayBundle:
-        """Apply the pose correction to the raybundle"""
-        assert ray_bundle.camera_indices is not None
-        assert self.pose_adjustment.device == ray_bundle.origins.device
-
-        if self.config.num_virtual_views == 1:
-            return ray_bundle
-
-        # duplicate optimized_bundle num_virtual_views times and stack
-        def repeat_fn(x):
-            return x.repeat_interleave(self.config.num_virtual_views, dim=0)
-
-        camera_ids = ray_bundle.camera_indices.squeeze()
-        if camera_ids.dim() == 0:
-            camera_ids = camera_ids[None]
-
-        poses_delta = self(camera_ids, mode)
-
-        if mode == "uniform":
-            if ray_bundle.ndim == 2:
-                ray_bundle = ray_bundle._apply_fn_to_fields(lambda x: x.flatten(start_dim=0, end_dim=1))
-                poses_delta = pp.SE3(torch.flatten(poses_delta, start_dim=0, end_dim=1))
-            poses_delta = pp.SE3(torch.flatten(poses_delta, start_dim=0, end_dim=1))
-            ray_bundle = ray_bundle._apply_fn_to_fields(repeat_fn)
-
-        ray_bundle.origins = poses_delta.translation() + ray_bundle.origins
-        ray_bundle.directions = poses_delta.rotation() @ ray_bundle.directions
-
-        return ray_bundle
+    def apply_to_raybundle(self, *args, **kwargs):
+        """Not implemented. Should not be called."""
+        raise NotImplementedError("Not implemented in BAD-Gaussians. Please checkout https://github.com/WU-CVGL/Bad-RFs")
 
     def apply_to_camera(self, camera: Cameras, mode: TrajSamplingMode) -> List[Cameras]:
         """Apply pose correction to the camera"""
