@@ -22,42 +22,30 @@ Deblurring & novel-view synthesis results on [Deblur-NeRF](https://github.com/li
 ### 1. Installation
 
 You may check out the original [`nerfstudio`](https://github.com/nerfstudio-project/nerfstudio) repo for prerequisites and dependencies. 
-Currently, our codebase is build on top of the latest version of nerfstudio (v1.0.3),
-so if you have an older version of nerfstudio installed,
-please `git clone` the main branch and install the latest version.
+Currently, our codebase is tested with nerfstudio v1.0.3.
 
 TL;DR: You can install `nerfstudio` with:
 
 ```bash
 # (Optional) create a fresh conda env
-conda create --name nerfstudio -y python=3.10
+conda create --name nerfstudio -y "python<3.11"
 conda activate nerfstudio
 
 # install dependencies
 pip install --upgrade pip setuptools
-pip install torch==2.1.2+cu118 torchvision==0.16.2+cu118 --extra-index-url https://download.pytorch.org/whl/cu118
+pip install "torch==2.1.2+cu118" "torchvision==0.16.2+cu118" --extra-index-url https://download.pytorch.org/whl/cu118
 
 conda install -c "nvidia/label/cuda-11.8.0" cuda-toolkit
 pip install ninja git+https://github.com/NVlabs/tiny-cuda-nn/#subdirectory=bindings/torch
 
 # install nerfstudio!
-git clone https://github.com/nerfstudio-project/nerfstudio
-cd nerfstudio
-pip install -e .
+pip install nerfstudio==1.0.3
 ```
 
-Besides, we use [pypose](https://github.com/pypose/pypose) to implement the pose interpolation. You can install it with:
+Then you can install this repo as a Python package with:
 
 ```bash
-pip install pypose
-```
-
-Then you can clone and install this repo as a Python package with:
-
-```bash
-git clone https://github.com/WU-CVGL/BAD-Gaussians
-cd BAD-Gaussians
-pip install -e .
+pip install git+https://github.com/WU-CVGL/BAD-Gaussians
 ```
 
 ### 2. Prepare the dataset
