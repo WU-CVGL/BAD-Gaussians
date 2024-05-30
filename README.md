@@ -205,36 +205,47 @@ If you find this useful, please consider citing:
 }
 ```
 
-## Acknowledgment
+## Acknowledgments
 
-- Kudos to the [Nerfstudio](https://github.com/nerfstudio-project/) contributors for their amazing work:
+- Kudos to the [Nerfstudio](https://github.com/nerfstudio-project/) and [gsplat](https://github.com/nerfstudio-project/gsplat) contributors for their amazing works:
 
-```bibtex
-@inproceedings{nerfstudio,
-	title        = {Nerfstudio: A Modular Framework for Neural Radiance Field Development},
-	author       = {
-		Tancik, Matthew and Weber, Ethan and Ng, Evonne and Li, Ruilong and Yi, Brent
-		and Kerr, Justin and Wang, Terrance and Kristoffersen, Alexander and Austin,
-		Jake and Salahi, Kamyar and Ahuja, Abhik and McAllister, David and Kanazawa,
-		Angjoo
-	},
-	year         = 2023,
-	booktitle    = {ACM SIGGRAPH 2023 Conference Proceedings},
-	series       = {SIGGRAPH '23}
-}
+    ```bibtex
+    @inproceedings{nerfstudio,
+        title        = {Nerfstudio: A Modular Framework for Neural Radiance Field Development},
+        author       = {
+            Tancik, Matthew and Weber, Ethan and Ng, Evonne and Li, Ruilong and Yi, Brent
+            and Kerr, Justin and Wang, Terrance and Kristoffersen, Alexander and Austin,
+            Jake and Salahi, Kamyar and Ahuja, Abhik and McAllister, David and Kanazawa,
+            Angjoo
+        },
+        year         = 2023,
+        booktitle    = {ACM SIGGRAPH 2023 Conference Proceedings},
+        series       = {SIGGRAPH '23}
+    }
 
-@software{Ye_gsplat,
-    author  = {Ye, Vickie and Turkulainen, Matias, and the Nerfstudio team},
-    title   = {{gsplat}},
-    url     = {https://github.com/nerfstudio-project/gsplat}
-}
+    @software{Ye_gsplat,
+        author  = {Ye, Vickie and Turkulainen, Matias, and the Nerfstudio team},
+        title   = {{gsplat}},
+        url     = {https://github.com/nerfstudio-project/gsplat}
+    }
 
-@misc{ye2023mathematical,
-    title={Mathematical Supplement for the $\texttt{gsplat}$ Library}, 
-    author={Vickie Ye and Angjoo Kanazawa},
-    year={2023},
-    eprint={2312.02121},
-    archivePrefix={arXiv},
-    primaryClass={cs.MS}
-}
-```
+    @misc{ye2023mathematical,
+        title={Mathematical Supplement for the $\texttt{gsplat}$ Library}, 
+        author={Vickie Ye and Angjoo Kanazawa},
+        year={2023},
+        eprint={2312.02121},
+        archivePrefix={arXiv},
+        primaryClass={cs.MS}
+    }
+    ```
+
+- Kudos to the [pypose](https://github.com/pypose/pypose) contributors for their amazing library:
+
+    ```bibtex
+    @inproceedings{wang2023pypose,
+    title = {{PyPose}: A Library for Robot Learning with Physics-based Optimization},
+    author = {Wang, Chen and Gao, Dasong and Xu, Kuan and Geng, Junyi and Hu, Yaoyu and Qiu, Yuheng and Li, Bowen and Yang, Fan and Moon, Brady and Pandey, Abhinav and Aryan and Xu, Jiahe and Wu, Tianhao and He, Haonan and Huang, Daning and Ren, Zhongqiang and Zhao, Shibo and Fu, Taimeng and Reddy, Pranay and Lin, Xiao and Wang, Wenshan and Shi, Jingnan and Talak, Rajat and Cao, Kun and Du, Yi and Wang, Han and Yu, Huai and Wang, Shanzhao and Chen, Siyu and Kashyap, Ananth  and Bandaru, Rohan and Dantu, Karthik and Wu, Jiajun and Xie, Lihua and Carlone, Luca and Hutter, Marco and Scherer, Sebastian},
+    booktitle = {IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+    year = {2023}
+    }
+    ```
