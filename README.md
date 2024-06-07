@@ -22,42 +22,30 @@ Deblurring & novel-view synthesis results on [Deblur-NeRF](https://github.com/li
 ### 1. Installation
 
 You may check out the original [`nerfstudio`](https://github.com/nerfstudio-project/nerfstudio) repo for prerequisites and dependencies. 
-Currently, our codebase is build on top of the latest version of nerfstudio (v1.0.3),
-so if you have an older version of nerfstudio installed,
-please `git clone` the main branch and install the latest version.
+Currently, our codebase is tested with nerfstudio v1.0.3.
 
 TL;DR: You can install `nerfstudio` with:
 
 ```bash
 # (Optional) create a fresh conda env
-conda create --name nerfstudio -y python=3.10
+conda create --name nerfstudio -y "python<3.11"
 conda activate nerfstudio
 
 # install dependencies
 pip install --upgrade pip setuptools
-pip install torch==2.1.2+cu118 torchvision==0.16.2+cu118 --extra-index-url https://download.pytorch.org/whl/cu118
+pip install "torch==2.1.2+cu118" "torchvision==0.16.2+cu118" --extra-index-url https://download.pytorch.org/whl/cu118
 
 conda install -c "nvidia/label/cuda-11.8.0" cuda-toolkit
 pip install ninja git+https://github.com/NVlabs/tiny-cuda-nn/#subdirectory=bindings/torch
 
 # install nerfstudio!
-git clone https://github.com/nerfstudio-project/nerfstudio
-cd nerfstudio
-pip install -e .
+pip install nerfstudio==1.0.3
 ```
 
-Besides, we use [pypose](https://github.com/pypose/pypose) to implement the pose interpolation. You can install it with:
+Then you can install this repo as a Python package with:
 
 ```bash
-pip install pypose
-```
-
-Then you can clone and install this repo as a Python package with:
-
-```bash
-git clone https://github.com/WU-CVGL/BAD-Gaussians
-cd BAD-Gaussians
-pip install -e .
+pip install git+https://github.com/WU-CVGL/BAD-Gaussians
 ```
 
 ### 2. Prepare the dataset
@@ -217,36 +205,47 @@ If you find this useful, please consider citing:
 }
 ```
 
-## Acknowledgment
+## Acknowledgments
 
-- Kudos to the [Nerfstudio](https://github.com/nerfstudio-project/) contributors for their amazing work:
+- Kudos to the [Nerfstudio](https://github.com/nerfstudio-project/) and [gsplat](https://github.com/nerfstudio-project/gsplat) contributors for their amazing works:
 
-```bibtex
-@inproceedings{nerfstudio,
-	title        = {Nerfstudio: A Modular Framework for Neural Radiance Field Development},
-	author       = {
-		Tancik, Matthew and Weber, Ethan and Ng, Evonne and Li, Ruilong and Yi, Brent
-		and Kerr, Justin and Wang, Terrance and Kristoffersen, Alexander and Austin,
-		Jake and Salahi, Kamyar and Ahuja, Abhik and McAllister, David and Kanazawa,
-		Angjoo
-	},
-	year         = 2023,
-	booktitle    = {ACM SIGGRAPH 2023 Conference Proceedings},
-	series       = {SIGGRAPH '23}
-}
+    ```bibtex
+    @inproceedings{nerfstudio,
+        title        = {Nerfstudio: A Modular Framework for Neural Radiance Field Development},
+        author       = {
+            Tancik, Matthew and Weber, Ethan and Ng, Evonne and Li, Ruilong and Yi, Brent
+            and Kerr, Justin and Wang, Terrance and Kristoffersen, Alexander and Austin,
+            Jake and Salahi, Kamyar and Ahuja, Abhik and McAllister, David and Kanazawa,
+            Angjoo
+        },
+        year         = 2023,
+        booktitle    = {ACM SIGGRAPH 2023 Conference Proceedings},
+        series       = {SIGGRAPH '23}
+    }
 
-@software{Ye_gsplat,
-    author  = {Ye, Vickie and Turkulainen, Matias, and the Nerfstudio team},
-    title   = {{gsplat}},
-    url     = {https://github.com/nerfstudio-project/gsplat}
-}
+    @software{Ye_gsplat,
+        author  = {Ye, Vickie and Turkulainen, Matias, and the Nerfstudio team},
+        title   = {{gsplat}},
+        url     = {https://github.com/nerfstudio-project/gsplat}
+    }
 
-@misc{ye2023mathematical,
-    title={Mathematical Supplement for the $\texttt{gsplat}$ Library}, 
-    author={Vickie Ye and Angjoo Kanazawa},
-    year={2023},
-    eprint={2312.02121},
-    archivePrefix={arXiv},
-    primaryClass={cs.MS}
-}
-```
+    @misc{ye2023mathematical,
+        title={Mathematical Supplement for the $\texttt{gsplat}$ Library}, 
+        author={Vickie Ye and Angjoo Kanazawa},
+        year={2023},
+        eprint={2312.02121},
+        archivePrefix={arXiv},
+        primaryClass={cs.MS}
+    }
+    ```
+
+- Kudos to the [pypose](https://github.com/pypose/pypose) contributors for their amazing library:
+
+    ```bibtex
+    @inproceedings{wang2023pypose,
+    title = {{PyPose}: A Library for Robot Learning with Physics-based Optimization},
+    author = {Wang, Chen and Gao, Dasong and Xu, Kuan and Geng, Junyi and Hu, Yaoyu and Qiu, Yuheng and Li, Bowen and Yang, Fan and Moon, Brady and Pandey, Abhinav and Aryan and Xu, Jiahe and Wu, Tianhao and He, Haonan and Huang, Daning and Ren, Zhongqiang and Zhao, Shibo and Fu, Taimeng and Reddy, Pranay and Lin, Xiao and Wang, Wenshan and Shi, Jingnan and Talak, Rajat and Cao, Kun and Du, Yi and Wang, Han and Yu, Huai and Wang, Shanzhao and Chen, Siyu and Kashyap, Ananth  and Bandaru, Rohan and Dantu, Karthik and Wu, Jiajun and Xie, Lihua and Carlone, Luca and Hutter, Marco and Scherer, Sebastian},
+    booktitle = {IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+    year = {2023}
+    }
+    ```

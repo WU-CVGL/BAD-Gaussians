@@ -21,6 +21,7 @@ from nerfstudio.cameras.cameras import Cameras
 from nerfstudio.cameras.rays import RayBundle
 
 from bad_gaussians.spline_functor import (
+    bezier_interpolation,
     cubic_bspline_interpolation,
     linear_interpolation,
     linear_interpolation_mid,
@@ -38,10 +39,15 @@ class BadCameraOptimizerConfig(CameraOptimizerConfig):
     _target: Type = field(default_factory=lambda: BadCameraOptimizer)
     """The target class to be instantiated."""
 
-    mode: Literal["off", "linear", "cubic"] = "linear"
+    mode: Literal["off", "linear", "cubic", "bezier"] = "linear"
     """Pose optimization strategy to use.
     linear: linear interpolation on SE(3);
-    cubic: cubic b-spline interpolation on SE(3)."""
+    cubic: cubic b-spline interpolation on SE(3).
+    bezier: Bezier curve interpolation on SE(3).
+    """
+
+    bezier_degree: int = 9
+    """Degree of the Bezier curve. Only used when mode is bezier."""
 
     trans_l2_penalty: float = 0.0
     """L2 penalty on translation parameters."""
@@ -81,11 +87,13 @@ class BadCameraOptimizer(CameraOptimizer):
 
         # Initialize learnable parameters.
         if self.config.mode == "off":
-            pass
+            return
         elif self.config.mode == "linear":
             self.num_control_knots = 2
         elif self.config.mode == "cubic":
             self.num_control_knots = 4
+        elif self.config.mode == "bezier":
+            self.num_control_knots = self.config.bezier_degree
         else:
             assert_never(self.config.mode)
 
@@ -136,10 +144,7 @@ class BadCameraOptimizer(CameraOptimizer):
 
         # Return: identity if no transforms are needed, otherwise composite transforms together.
         if len(outputs) == 0:
-            return pp.identity_SE3(
-                *(indices.shape[0], self.num_control_knots),
-                device=self.pose_adjustment.device
-            )
+            return pp.identity_SE3(*indices.shape, device=self.device)
         return functools.reduce(pp.mul, outputs)
 
     def _interpolate(
@@ -158,6 +163,8 @@ class BadCameraOptimizer(CameraOptimizer):
                 return linear_interpolation(camera_opt, u)
             elif self.config.mode == "cubic":
                 return cubic_bspline_interpolation(camera_opt, u)
+            elif self.config.mode == "bezier":
+                return bezier_interpolation(camera_opt, u)
             else:
                 assert_never(self.config.mode)
         elif mode == "mid":
@@ -168,6 +175,8 @@ class BadCameraOptimizer(CameraOptimizer):
                     camera_opt,
                     torch.tensor([0.5], device=camera_opt.device)
                 ).squeeze(1)
+            elif self.config.mode == "bezier":
+                return bezier_interpolation(camera_opt, torch.tensor([0.5], device=camera_opt.device)).squeeze(1)
             else:
                 assert_never(self.config.mode)
         elif mode == "start":
@@ -178,6 +187,8 @@ class BadCameraOptimizer(CameraOptimizer):
                     camera_opt,
                     torch.tensor([0.0], device=camera_opt.device)
                 ).squeeze(1)
+            elif self.config.mode == "bezier":
+                return bezier_interpolation(camera_opt, torch.tensor([0.0], device=camera_opt.device)).squeeze(1)
             else:
                 assert_never(self.config.mode)
         elif mode == "end":
@@ -188,47 +199,22 @@ class BadCameraOptimizer(CameraOptimizer):
                     camera_opt,
                     torch.tensor([1.0], device=camera_opt.device)
                 ).squeeze(1)
+            elif self.config.mode == "bezier":
+                return bezier_interpolation(camera_opt, torch.tensor([1.0], device=camera_opt.device)).squeeze(1)
             else:
                 assert_never(self.config.mode)
         else:
             assert_never(mode)
 
-    def apply_to_raybundle(self, ray_bundle: RayBundle, mode: TrajSamplingMode) -> RayBundle:
-        """Apply the pose correction to the raybundle"""
-        assert ray_bundle.camera_indices is not None
-        assert self.pose_adjustment.device == ray_bundle.origins.device
-
-        if self.config.num_virtual_views == 1:
-            return ray_bundle
-
-        # duplicate optimized_bundle num_virtual_views times and stack
-        def repeat_fn(x):
-            return x.repeat_interleave(self.config.num_virtual_views, dim=0)
-
-        camera_ids = ray_bundle.camera_indices.squeeze()
-        if camera_ids.dim() == 0:
-            camera_ids = camera_ids[None]
-
-        poses_delta = self(camera_ids, mode)
-
-        if mode == "uniform":
-            if ray_bundle.ndim == 2:
-                ray_bundle = ray_bundle._apply_fn_to_fields(lambda x: x.flatten(start_dim=0, end_dim=1))
-                poses_delta = pp.SE3(torch.flatten(poses_delta, start_dim=0, end_dim=1))
-            poses_delta = pp.SE3(torch.flatten(poses_delta, start_dim=0, end_dim=1))
-            ray_bundle = ray_bundle._apply_fn_to_fields(repeat_fn)
-
-        ray_bundle.origins = poses_delta.translation() + ray_bundle.origins
-        ray_bundle.directions = poses_delta.rotation() @ ray_bundle.directions
-
-        return ray_bundle
+    def apply_to_raybundle(self, *args, **kwargs):
+        """Not implemented. Should not be called."""
+        raise NotImplementedError("Not implemented in BAD-Gaussians. Please checkout https://github.com/WU-CVGL/Bad-RFs")
 
     def apply_to_camera(self, camera: Cameras, mode: TrajSamplingMode) -> List[Cameras]:
         """Apply pose correction to the camera"""
-        assert self.config.mode != "off"
         # assert camera.metadata is not None, "Must provide camera metadata"
         # assert "cam_idx" in camera.metadata, "Must provide id of camera in its metadata"
-        if camera.metadata is None or not ("cam_idx" in camera.metadata):
+        if self.config.mode == "off" or camera.metadata is None or not ("cam_idx" in camera.metadata):
             # print("[WARN] Cannot get cam_idx in camera.metadata")
             return [deepcopy(camera)]
 

@@ -8,7 +8,6 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Literal, Optional, Tuple, Type, Union
 
 import torch
-from torch import Tensor
 
 from gsplat.project_gaussians import project_gaussians
 from gsplat.rasterize import rasterize_gaussians
@@ -18,7 +17,6 @@ from nerfstudio.cameras.cameras import Cameras
 from nerfstudio.data.scene_box import OrientedBox
 from nerfstudio.models.splatfacto import SplatfactoModel, SplatfactoModelConfig
 from nerfstudio.model_components import renderers
-from nerfstudio.utils import colormaps
 
 from bad_gaussians.bad_camera_optimizer import (
     BadCameraOptimizer,
@@ -69,6 +67,11 @@ class BadGaussiansModelConfig(SplatfactoModelConfig):
 
     num_downscales: int = 0
     """at the beginning, resolution is 1/2^d, where d is this number. Default: 0. Use 2 with high resolution images."""
+
+    enable_absgrad: bool = False
+    """Whether to enable absgrad for gaussians. (It affects param tuning of densify_grad_thresh)
+    Default: False. Ref: (https://github.com/nerfstudio-project/nerfstudio/pull/3113)
+    """
 
     tv_loss_lambda: Optional[float] = None
     """weight of total variation loss"""
@@ -280,6 +283,38 @@ class BadGaussiansModel(SplatfactoModel):
             depth_im = torch.where(alpha > 0, depth_im / alpha, depth_im.detach().max())
 
         return {"rgb": rgb, "depth": depth_im, "accumulation": alpha, "background": background}  # type: ignore
+
+    def after_train(self, step: int):
+        assert step == self.step
+        # to save some training time, we no longer need to update those stats post refinement
+        if self.step >= self.config.stop_split_at:
+            return
+        with torch.no_grad():
+            # keep track of a moving average of grad norms
+            visible_mask = (self.radii > 0).flatten()
+            # BAD-Gaussians: use absgrad if enabled
+            if self.config.enable_absgrad:
+                assert self.xys.absgrad is not None  # type: ignore
+                grads = self.xys.absgrad.detach().norm(dim=-1)  # type: ignore
+            else:
+                assert self.xys.grad is not None
+                grads = self.xys.grad.detach().norm(dim=-1)
+            # print(f"grad norm min {grads.min().item()} max {grads.max().item()} mean {grads.mean().item()} size {grads.shape}")
+            if self.xys_grad_norm is None:
+                self.xys_grad_norm = grads
+                self.vis_counts = torch.ones_like(self.xys_grad_norm)
+            else:
+                assert self.vis_counts is not None
+                self.vis_counts[visible_mask] = self.vis_counts[visible_mask] + 1
+                self.xys_grad_norm[visible_mask] = grads[visible_mask] + self.xys_grad_norm[visible_mask]
+            # update the max screen size, as a ratio of number of pixels
+            if self.max_2Dsize is None:
+                self.max_2Dsize = torch.zeros_like(self.radii, dtype=torch.float32)
+            newradii = self.radii.detach()[visible_mask]
+            self.max_2Dsize[visible_mask] = torch.maximum(
+                self.max_2Dsize[visible_mask],
+                newradii / float(max(self.last_size[0], self.last_size[1])),
+            )
 
     @torch.no_grad()
     def get_outputs_for_camera(
