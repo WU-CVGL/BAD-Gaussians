@@ -4,7 +4,8 @@ version = "1.0.3"
 
 dependencies=[
     "nerfstudio>=1.0.3",
-    "pypose"
+    "pypose",
+    "gsplat>=0.1.11,<1.0.0"
 ]
 
 # black
