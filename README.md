@@ -195,13 +195,11 @@ Open this repo with your IDE, create a configuration, and set the executing pyth
 If you find this useful, please consider citing:
 
 ```bibtex
-@misc{zhao2024badgaussians,
-    title={{BAD-Gaussians: Bundle Adjusted Deblur Gaussian Splatting}},
-    author={Zhao, Lingzhe and Wang, Peng and Liu, Peidong},
-    year={2024},
-    eprint={2403.11831},
-    archivePrefix={arXiv},
-    primaryClass={cs.CV}
+@article{zhao2024bad-gaussians,
+  title={BAD-Saussians: Bundle Adjusted Deblur Gaussian Splatting},
+  author={Zhao, Lingzhe and Wang, Peng and Liu, Peidong},
+  journal={arXiv preprint arXiv:2403.11831},
+  year={2024}
 }
 ```
 
