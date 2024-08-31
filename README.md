@@ -195,12 +195,12 @@ Open this repo with your IDE, create a configuration, and set the executing pyth
 If you find this useful, please consider citing:
 
 ```bibtex
-@article{zhao2024badgaussians,
-  title={Bad-gaussians: Bundle adjusted deblur gaussian splatting},
-  author={Zhao, Lingzhe and Wang, Peng and Liu, Peidong},
-  journal={arXiv preprint arXiv:2403.11831},
-  year={2024}
-}
+@inproceedings{zhao2024badgaussians,
+    author = {Zhao, Lingzhe and Wang, Peng and Liu, Peidong},
+    title = {Bad-gaussians: Bundle adjusted deblur gaussian splatting},
+    booktitle = {European Conference on Computer Vision (ECCV)},
+    year = {2024}
+} 
 ```
 
 ## Acknowledgments
