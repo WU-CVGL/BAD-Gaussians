@@ -6,11 +6,11 @@ Created by lzzhao on 2023.09.29
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Tuple, Type
+from typing import Optional, Tuple, Type
 
 import pypose as pp
 import torch
-from jaxtyping import Float
+from jaxtyping import Bool, Float
 from pypose import LieTensor
 from torch import nn, Tensor
 from typing_extensions import assert_never
@@ -18,6 +18,8 @@ from typing_extensions import assert_never
 from nerfstudio.configs.base_config import InstantiateConfig
 
 from bad_gaussians.spline_functor import linear_interpolation, cubic_bspline_interpolation
+
+DEBUG_PRINT_PRECISION = 10
 
 
 @dataclass
@@ -83,9 +85,29 @@ class Spline(nn.Module):
             assert_never(self.config.degree)
         return poses.squeeze()
 
-    def get_segment(
+    def check_timestamps(
             self,
             timestamps: Float[Tensor, "*batch_size"]
+        ) -> Tuple[
+            bool,
+            Optional[Bool[Tensor, "*batch_size"]]
+        ]:
+        """Check if the timestamps are within the valid range.
+
+        Args:
+            timestamps: Timestamps to check.
+
+        Returns:
+            valid: Whether the timestamps are within the valid range.
+            out_of_bound: The timestamps that are out of bound.    
+        """
+        out_of_bound = torch.logical_or(timestamps < self.t_lower_bound, timestamps > self.t_upper_bound)
+        return not out_of_bound.any(), out_of_bound
+
+    def get_segment(
+            self,
+            timestamps: Float[Tensor, "*batch_size"],
+            check_timestamps: bool = True
     ) -> Tuple[
         Float[LieTensor, "*batch_size self.order 7"],
         Float[Tensor, "*batch_size"]
@@ -94,13 +116,20 @@ class Spline(nn.Module):
 
         Args:
             timestamps: Timestamps to get the spline segment and normalized position at.
+            check_timestamps: Whether to check if the timestamps are within the valid range.
 
         Returns:
             segment: The spline segment.
             u: The normalized position on the segment.
         """
-        assert torch.all(timestamps >= self.t_lower_bound)
-        assert torch.all(timestamps <= self.t_upper_bound)
+        if check_timestamps:
+            valid, out_of_bound = self.check_timestamps(timestamps)
+            try:
+                assert valid
+            except AssertionError as e:
+                torch.set_printoptions(precision=DEBUG_PRINT_PRECISION)
+                raise ValueError(f"Timestamps {timestamps[out_of_bound]} are out of bound.") from e
+
         batch_size = timestamps.shape
         relative_time = timestamps - self.start_time
         normalized_time = relative_time / self.config.sampling_interval

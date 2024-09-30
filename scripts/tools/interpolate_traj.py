@@ -12,7 +12,7 @@ from bad_gaussians.spline import SplineConfig
 
 DEVICE = 'cpu'
 torch.set_default_dtype(torch.float64)
-
+torch.set_printoptions(precision=5, sci_mode=False)
 
 def main():
     parser = argparse.ArgumentParser(description="Interpolate TUM trajectory with cubic B-spline given timestamps.")
@@ -59,7 +59,7 @@ def main():
     timestamps = []
     with open(times_path, 'r') as f:
         for line in f:
-            timestamps.append(float(line.strip()))
+            timestamps.append(float(line.split(' ')[0].strip()))
 
     timestamps = torch.tensor(timestamps, dtype=torch.float64)
     linear_poses = linear_spline(timestamps)
