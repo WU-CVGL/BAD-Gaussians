@@ -1,13 +1,19 @@
-import random
+from __future__ import annotations
 
+import random
+from pathlib import Path
+from typing import Tuple
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pypose as pp
 import torch
 import torch.nn.functional as F
+from jaxtyping import Float
+from matplotlib import colormaps
+from pypose import LieTensor
 from sklearn.neighbors import NearestNeighbors
 from torch import Tensor
-import matplotlib.pyplot as plt
-from matplotlib import colormaps
 
 
 class CameraOptModuleSE3(torch.nn.Module):
@@ -141,6 +147,61 @@ class AppearanceOptModule(torch.nn.Module):
         return colors
 
 
+class TrajectoryIO:
+    @staticmethod
+    def load_tum_trajectory(filename: Path) -> Tuple[Float[Tensor, "num_poses"], Float[LieTensor, "num_poses 7"]]:
+        """Load TUM trajectory from file"""
+        with open(filename, "r", encoding="UTF-8") as f:
+            lines = f.read().splitlines()
+        if lines[0].startswith("#"):
+            lines.pop(0)
+        lines = [line.split() for line in lines]
+        lines = [[float(val) for val in line] for line in lines]
+        timestamps = []
+        poses = []
+        for line in lines:
+            timestamps.append(torch.tensor(line[0]))
+            poses.append(torch.tensor(line[1:]))
+        timestamps = torch.stack(timestamps)
+        poses = pp.SE3(torch.stack(poses))
+        return timestamps, poses
+
+    @staticmethod
+    def load_kitti_trajectory(filename: Path) -> Float[LieTensor, "num_poses 7"]:
+        """Load KITTI trajectory from file"""
+        with open(filename, "r", encoding="UTF-8") as f:
+            lines = f.read().splitlines()
+        lines = [line.split() for line in lines]
+        lines = [[float(val) for val in line] for line in lines]
+        poses = []
+        for line in lines:
+            poses.append(torch.tensor(line).reshape(4, 4))
+        poses = pp.mat2SE3(torch.stack(poses).cuda())
+        return poses
+
+    @staticmethod
+    def write_tum_trajectory(
+        filename: Path,
+        timestamps: Float[Tensor, "num_poses"],
+        poses: Float[LieTensor, "num_poses 7"] | Float[Tensor, "num_poses 7"],
+    ):
+        """Write TUM trajectory to file"""
+        with open(filename, "w", encoding="UTF-8") as f:
+            if pp.is_lietensor(poses):
+                poses = poses.tensor()
+            for timestamp, pose in zip(timestamps, poses):
+                f.write(f"{timestamp.item()} {pose[0]} {pose[1]} {pose[2]} {pose[3]} {pose[4]} {pose[5]} {pose[6]}\n")
+
+    @staticmethod
+    def write_kitti_trajectory(filename: Path, poses: Float[LieTensor, "num_poses 7"] | Float[Tensor, "num_poses 7"]):
+        """Write KITTI trajectory to file"""
+        with open(filename, "w", encoding="UTF-8") as f:
+            poses = pp.SE3(poses)
+            poses = poses.matrix()  # 4x4 matrix
+            for pose in poses:
+                f.write(f"{' '.join([str(p.item()) for p in pose.flatten()])}\n")
+
+
 def rotation_6d_to_matrix(d6: Tensor) -> Tensor:
     """
     Converts 6D rotation representation by Zhou et al. [1] to rotation matrix
@@ -245,19 +306,3 @@ def apply_depth_colormap(
     if acc is not None:
         img = img * acc + (1.0 - acc)
     return img
-
-
-if __name__ == "__main__":
-    # test PoseOptModule
-    camera_to_worlds = torch.eye(4).unsqueeze(0).repeat(10, 1, 1)
-
-    pose_opt = PoseOptModule(camera_to_worlds, bezier_degree=5)
-
-    poses = pose_opt.get_poses()
-
-    print(poses)
-
-    # Inspect all parameters
-    print("\nParameters:")
-    for name, param in pose_opt.named_parameters():
-        print(f"Name: {name}, Shape: {param.shape}, Requires Grad: {param.requires_grad}")

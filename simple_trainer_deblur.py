@@ -26,6 +26,7 @@ from torchmetrics.image import PeakSignalNoiseRatio, StructuralSimilarityIndexMe
 from torchmetrics.image.lpip import LearnedPerceptualImagePatchSimilarity
 
 from bad_gaussians.bad_camera_optimizer import BadCameraOptimizer, BadCameraOptimizerConfig
+from datasets.blender_dataperser import BlenderParser
 from datasets.colmap import Dataset
 from datasets.colmap_dataparser import ColmapParser
 from datasets.deblur_nerf import DeblurNerfDataset
@@ -48,8 +49,8 @@ from utils import (
 class DeblurConfig(Config):
     # Path to the Mip-NeRF 360 dataset
     # data_dir: str = "data/360_v2/garden"
-    data_dir: str = "/datasets/bad-gaussian/data/bad-nerf-gtK-colmap-nvs/blurtanabata"
-
+    # data_dir: str = "/datasets/bad-gaussian/data/bad-nerf-gtK-colmap-nvs/blurtanabata"
+    data_dir: str = "/home/lzzhao/ws/BAD-Gaussians2/data/blurtanabata"
     # Downsample factor for the dataset
     data_factor: int = 1
     # How much to scale the camera origins by. 0.25 is suggested for LLFF scenes.
@@ -188,6 +189,7 @@ class DeblurRunner(Runner):
 
         # Load data: Training data should contain initial points and colors.
         self.parser = ColmapParser(
+        # self.parser = BlenderParser(
             data_dir=cfg.data_dir,
             factor=cfg.data_factor,
             normalize=True,

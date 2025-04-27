@@ -95,7 +95,7 @@ class Config:
     save_steps: List[int] = field(default_factory=lambda: [7_000, 30_000])
 
     # Initialization strategy
-    init_type: str = "sfm"
+    init_type: Literal["random", "sfm"] = "sfm"
     # Initial number of GSs. Ignored if using sfm
     init_num_pts: int = 100_000
     # Initial extent of GSs as a multiple of the camera extent. Ignored if using sfm
@@ -441,6 +441,11 @@ class Runner:
         quats = self.splats["quats"]  # [N, 4]
         scales = torch.exp(self.splats["scales"])  # [N, 3]
         opacities = torch.sigmoid(self.splats["opacities"])  # [N,]
+
+        # if camtoworlds is 3 by 4, convert to square (4 by 4)
+        if camtoworlds.shape[-2] == 3:
+            # add one row [0,0,0,1]
+            camtoworlds = torch.cat([camtoworlds, torch.tensor([0, 0, 0, 1], device=camtoworlds.device).view(1, 4)], 0)
 
         image_ids = kwargs.pop("image_ids", None)
         if self.cfg.app_opt:

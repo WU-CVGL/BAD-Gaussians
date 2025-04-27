@@ -3,8 +3,12 @@
 <a href="https://arxiv.org/abs/2403.11831"><img src="https://img.shields.io/badge/arXiv-2403.11831-b31b1b.svg"></a>
 <a href="https://lingzhezhao.github.io/BAD-Gaussians/"><img src="https://img.shields.io/badge/Project-Page-green.svg"/></a>
 
-This as an official implementation of our arXiv 2024 paper 
-[**BAD-Gaussians**: Bundle Adjusted Deblur Gaussian Splatting](https://lingzhezhao.github.io/BAD-Gaussians/), based on the [nerfstudio](https://github.com/nerfstudio-project/nerfstudio) framework.
+This as the 2nd official implementation of our arXiv 2024 paper 
+[**BAD-Gaussians**: Bundle Adjusted Deblur Gaussian Splatting](https://lingzhezhao.github.io/BAD-Gaussians/), based on the 
+[gsplat](https://github.com/nerfstudio-project/gsplat) framework.
+
+Previously, we have an implementation based on the 
+[nerfstudio](https://github.com/nerfstudio-project/nerfstudio) framework, now has been moved into [Bad-RFs](https://github.com/WU-CVGL/Bad-RFs/).
 
 ## Demo
 
@@ -21,38 +25,31 @@ Deblurring & novel-view synthesis results on [Deblur-NeRF](https://github.com/li
 
 ### 1. Installation
 
-You may check out the original [`nerfstudio`](https://github.com/nerfstudio-project/nerfstudio) repo for prerequisites and dependencies. 
-Currently, our codebase is tested with nerfstudio v1.0.3.
+You may check out the original [`gsplat`](https://github.com/nerfstudio-project/gsplat) repo for prerequisites and dependencies. 
+Currently, our codebase is tested with gsplat v1.4.0.
 
-TL;DR: You can install `nerfstudio` with:
+TL;DR: You can install `gsplat` with:
 
 ```bash
 # (Optional) create a fresh conda env
-conda create --name nerfstudio -y "python<3.11"
-conda activate nerfstudio
+conda create --name gsplat -y "python<3.11"
+conda activate gsplat
 
 # install dependencies
 pip install --upgrade pip setuptools
 pip install "torch==2.1.2+cu118" "torchvision==0.16.2+cu118" --extra-index-url https://download.pytorch.org/whl/cu118
 
-conda install -c "nvidia/label/cuda-11.8.0" cuda-toolkit
-pip install ninja git+https://github.com/NVlabs/tiny-cuda-nn/#subdirectory=bindings/torch
-
-# install nerfstudio!
-pip install nerfstudio==1.0.3
-```
-
-Then you can install this repo as a Python package with:
-
-```bash
-pip install git+https://github.com/WU-CVGL/BAD-Gaussians
+#
+pip install gsplat
 ```
 
 ### 2. Prepare the dataset
 
 #### Deblur-NeRF Synthetic Dataset (Re-rendered)
 
-As described in the previous BAD-NeRF paper, we re-rendered Deblur-NeRF's synthetic dataset with 51 interpolations per blurry image.
+Following the previous BAD-NeRF paper, we use the re-rendered Deblur-NeRF's synthetic dataset with 51 interpolations per blurry image.
+
+> Erratum: We also fixed the mis-match between blurry and NVS images in the "Tanabata" scene of BAD-NeRF, caused by the inconsistancy of the blend file and the data from Deblur-NeRF.
 
 Additionally, in the previous BAD-NeRF paper, we directly run COLMAP on blurry images only, with neither ground-truth 
 camera intrinsics nor sharp novel-view images. We find this is quite challenging for COLMAP - it may fail to 
@@ -68,27 +65,7 @@ You can directly download the `real_camera_motion_blur` folder from [Deblur-NeRF
 
 #### Your Custom Dataset
 
-1. Use the [`ns-process-data` tool from Nerfstudio](https://docs.nerf.studio/reference/cli/ns_process_data.html)
-    to process deblur-nerf training images. 
-
-    For example, if the
-    [dataset from BAD-NeRF](https://westlakeu-my.sharepoint.com/:f:/g/personal/cvgl_westlake_edu_cn/EsgdW2cRic5JqerhNbTsxtkBqy9m6cbnb2ugYZtvaib3qA?e=bjK7op)
-    is in `llff_data`, execute:
-
-    ```
-    ns-process-data images \
-        --data llff_data/blurtanabata/images \
-        --output-dir data/my_data/blurtanabata
-    ```
-
-2. The folder `data/my_data/blurtanabata` is ready.
-
-> Note: Although nerfstudio does not model the NDC scene contraction for LLFF data, 
-> we found that `scale_factor = 0.25` works well on LLFF datasets.
-> If your data is captured in a [LLFF fashion](https://github.com/Fyusion/LLFF#using-your-own-input-images-for-view-synthesis) (i.e. forward-facing), 
-> instead of object-centric like Mip-NeRF 360, 
-> you can pass the `scale_factor = 0.25` parameter to the nerfstudio dataparser (which is already set to default in our `DeblurNerfDataParser`),
-> e.g., `ns-train bad-gaussians --data data/my_data/my_seq --vis viewer+tensorboard nerfstudio-data --scale_factor 0.25`
+# TODO
 
 ### 3. Training
 

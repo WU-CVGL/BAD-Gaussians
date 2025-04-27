@@ -20,6 +20,7 @@ from contextlib import nullcontext
 from functools import partial
 from pathlib import Path
 from PIL import Image
+from tqdm import tqdm
 from typing import List, Literal, Optional
 
 import cv2
@@ -31,8 +32,8 @@ from datasets.colmap_utils import (
     auto_orient_and_center_poses,
 )
 from rich.console import Console
-from rich.prompt import Confirm
 
+MAX_AUTO_RESOLUTION = 1600
 CONSOLE = Console(width=120)
 
 
@@ -515,3 +516,32 @@ class ColmapParser:
         assert isinstance(self._downscale_factor, int)
         self._downscale_factor = None
         return image_filenames, mask_filenames, depth_filenames, self._downscale_factor
+
+if __name__ == "__main__":
+    import argparse
+    import imageio.v2 as imageio
+
+    from datasets.colmap import Dataset
+
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data_dir", type=str, default="data/360_v2/garden")
+    parser.add_argument("--factor", type=int, default=4)
+    args = parser.parse_args()
+
+    # Parse COLMAP data.
+    parser = ColmapParser(
+        data_dir=args.data_dir, factor=args.factor, normalize=True, test_every=8
+    )
+    dataset = Dataset(parser, split="train", load_depths=True)
+    print(f"Dataset: {len(dataset)} images.")
+
+    writer = imageio.get_writer("results/points.mp4", fps=30)
+    for data in tqdm(dataset, desc="Plotting points"):
+        image = data["image"].numpy().astype(np.uint8)
+        points = data["points"].numpy()
+        depths = data["depths"].numpy()
+        for x, y in points:
+            cv2.circle(image, (int(x), int(y)), 2, (255, 0, 0), -1)
+        writer.append_data(image)
+    writer.close()

@@ -1,4 +1,4 @@
-SCENE_DIR="$HOME/data/deblur-nerf/data-real"
+SCENE_DIR="/datasets/tencent/data-real"
 RESULT_DIR="results/benchmark_mcmc_500k/dbnerf_real_cubic4"
 SCENE_LIST="blurball blurbasket blurbuick blurcoffee blurdecoration blurgirl blurheron blurparterre blurpuppet blurstair"
 
